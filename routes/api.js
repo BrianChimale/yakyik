@@ -1,0 +1,108 @@
+var express = require('express');
+var router = express.Router();
+var ZoneController = require('../controllers/ZoneController')
+var controllers = require('../controllers')
+
+//The order of the function's arguments is quite important
+router.get('/:resource', function(req, res, next){
+//This endpoint accesses both resources
+    var resource = req.params.resource;
+    //Use of the generic controller so not to confirmation resource access to only only one
+    var controller = controllers[resource]
+
+    //Test if the resource exists
+    if (controller == null){
+
+        res.json({
+            confirmation: 'fail',
+            message: 'Invalid Resource Request: ' + resource
+        });
+
+    }
+
+    controller.find(req.query, function(err, results){
+
+        if (err){
+            res.json({
+                confirmation: 'fail',
+                message: err
+            })
+
+            return
+
+        }
+
+        res.json({
+            confirmation: 'success',
+            results: results
+        })
+        
+    });
+
+});
+
+router.get('/:resource/:id', function(req, res, next){
+
+    var resource = req.params.resource;
+    var id = req.params.id;
+
+    var controller = controllers[resource]
+
+    if (controller == null){
+        res.json({
+            confirmation: 'fail',
+            message: 'Invalid Resource Request: ' + resource
+        });
+    }
+
+    controller.findById(id, function(err, result){
+
+        if(err){
+            res.json({
+                confirmation: 'fail',
+                message: 'Not Found'
+            })
+            return
+        }
+
+        res.json({
+            confirmation: 'success',
+            result: result
+        })
+
+    });
+
+});
+
+router.post('/:resource', function(req, res, next){
+
+    var resource = req.params.resource;
+
+    var controller = controllers[resource]
+
+    if (controller == null){
+        res.json({
+            confirmation: 'fail',
+            message: 'Invalid Resource Request: ' + resource
+        });
+    }
+
+    controller.create(req.body, function(err, result){
+
+        if(err){
+            res.json({
+                confirmation: 'fail',
+                message: err
+            })
+            return
+        }
+        res.json({
+            confirmation: 'success',
+            result: result
+        })
+
+    });
+
+});
+
+module.exports = router

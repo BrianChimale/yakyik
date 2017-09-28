@@ -1,0 +1,221 @@
+Beginning of web app: start with route REST APIs
+Install express-generator globally: npm install -g express-generator
+
+create a new project: express yak-yik --hogan
+install the dependencies: npm install
+run the node server: nodemon
+create routes files: cd ./routes
+                     copy NUL api.js
+
+change the variable 'users' in the app.js to become 'api' since the router api 'user.js' isn't required, it's the 'api.js'
+The effect of app.use('/api', api) is that whenever the resource api is used, it redirects to the api.js file
+Test on the browser: localhost/3000/api/resource
+
+(REST API revolves around models, in the REST context it's called resources)
+create the resources/models: mkdir models
+                             copy NUL Comment.js
+                             copy NUL Zone.js
+
+Install the mogoose module for the resources: npm i -s mongoose
+Within the resource files, Zone.js and Comment.js, define the schema of the database in Mongo
+With these resources, CRUD operations have to be created for them: Create, Read, Update and Delete
+These operations are in the Controllers,
+create the controller directory: mkdir controllers
+create the controller files: copy NUL ZoneController.js
+                             copy NUL CommentController.js
+                             copy NUL index.js
+
+Within these controllers, define the main CRUD operators; mongoose callback methods.
+In the app.js file, import mongoose and connect it to the database. Remember to run 
+
+MongoDB locally first. This is done by running C:\Program Files\MongoDB\Server\3.4\bin\mongod.exe
+In the 'api.js', import the controller
+Implement the controller callback function within the router.get function. 
+The router defines the path that access the resource.
+To test in the browser, type in the path defined in the router: http://localhost:3000/api/zone
+                                                                http://localhost:3000/api
+
+Implementing the create mongoose callback function in the controller is similar to the other functions.
+Testing it, however, needs a little more work. Every REST API revolves around the resource. All callback functions should point to a resource. The actual resource name is the most important part of an API call.
+Hence a JSX (.hjs) file is created in the views directory to be displayed
+to the user and prompt for input that is be put into the database.
+Then add a route.post function in the api.js file
+N/B:
+The http method defines the action to be taken when accessing an endpoint.
+The post call creates something. The put call updates a resource
+
+To access the newly created JSX page, define it within the route/index.js route, add a get method that retrieves the page('/createzone')
+
+The zipCodes can be multiple values and currently they are all saved as a single string.
+To seperate the zipCodes to be individual values, the string has to be split(',') and trimmed to eliminate the whitespace.
+This is done within the ZoneController.js since the controllers are meant to execute logic that is specific to resource.
+
+Set up both the ZoneController and CommentController acoordingly. 
+They are both the same except for the create method in CommentController doesn't have zipCodes in them.
+
+Set up the controller/index.js file.
+Import the other two controllers.
+Create the two keys, comment and zone, which are named after the resource
+
+In the api.js file, rewire it to become a generic API for any resource:
+    var controllers = require('../controllers)
+If you do not specify the file, the default file , index.js, is assigned.
+Within the routes, corresponding controllers can be fetched by resource name.
+Since both controllers have identical functions, call whatever function that is to be called.
+Essentially, we're grabbing the controller that corresponding to the resource name as defined in the module.exports in the index file.
+The route now is now part of any resource, not confined to either Zone or Comment resource.
+To handle accessing of resources that do not exist, test if the controller is null and display the message accordingly.
+
+NOTE: To delete a collection (somewhat like a table) from mongodb, with the name of the database(yak-yik):
+in a new cmd terminal, access mongo yak-yik
+To view list of all collections in the database, type: show collections
+To delete a particular collection(zoneschemas), type in: db.getCollection("zoneschemas").drop()
+If successful, it returns true
+To exit, type in: exit
+
+To test comment resource access, create a JSX file to add its values in views.
+Remember that for every JSX file created, a get method to retrieve it should be added in the routes/index.js file
+
+REACT
+The react code will leverage the API to obtain the data required as well as create it.
+
+React is a component based system, that is in it one creates a series of visual building pieces called components 
+and patch these components to create the UI.
+
+To work with react several dependencies and node modules have to be installed(These can be done using the create react app):
+npm i -S react
+npm i -S react-dom
+npm i -D webpack
+npm i -g webpack
+npm i -D babel-core
+npm i -D babel-loader
+npm i -D babel-preset-react
+npm i -D babel-preset-es2015
+
+react and react-dom contain the libraries for react itself for creating web apps. 
+They were seperated since react isn't confined to only web development. react-dom binds the react 
+code to the html dom.
+webpack runs a bundle task. Since react code is in es6/es2015. This code has to be transpiled to es5 that is supported by most browser.
+This transpilation is done by babel, but babel requires a bundle task, done by webpack.
+So the react code written is translated into a bundle and the bundle gets run.
+
+Since the webpack executes the bundle scripts, nothing can be run until webpack is set up.
+In the root directory, create a file: copy NUL webpack.config.js
+In this file is where webpack tells babel what to do, i.e. bundling
+
+In the webpack file, the entry to the file is the react code. It bundles it and places it somewhere else as defined in output object.
+
+The react code is thus written in the src/app.js file.
+The code is written in ES6 javascript
+Component is essentially a custom HTML tag, which whenever the tag is used, whatever is returned in the render() function is what is to be displayed.
+The tag is to be rendered in the DOM using ReactDOM, using a custom HTML tag.
+
+Since the code is in ES6, it won't run. It's the bundle code that'll run. The file is bundled in webpack.
+To run webpack, once it has been setup, go to the root directory and in the terminal type: webpack
+To keep webpack watching the files so that it automatically recompiles the app.js file when it's changed, use the command: webpack -w
+
+In the views/index.js, run the react code in it.
+In it, we import the bundle in a script tag, and add a div tag with the id root.
+To add other components to the app.js file, create a seperate directory called components to hold the components.
+The app.js file is the entry point.
+
+Create a Zones Component in it. Note the class itself is the component, for which at minimum it should render its JSX tags.
+These are seperate components that will be added into the entry point, app.js, hence they do not need react-dom. All that is needed is that it is exported.
+To add the component to the app.js, import it and it to the render function like a HTML tag.
+Whenever transpilation of react code crashes, it'll reflect in the webpack. It won't however show in the browser since it runs the previous build, the new one failed to transpile. Always check webpack frequently for errors.
+
+NOTE: All JSX tags must be closed. Look out for this particularly when working with other people's code.
+
+The Zones component will perform CRUD operations. It is thus called a container component.
+The ZonesList component is mostly for visual purposes. It is thus called a presentational component.
+
+Since the component data is hard coded, it displays the same thing all through. To assign data dynamically, this is done using component properties in the react variable props. 
+This is done by creating a custom named option in the JSX tag and giving it its value.
+Then within the component itself, to place the data in a specific location in it, use the react code, where name is the custom chosen name: this.props.name
+The property name can be chosen as one wishes. There can be as many properties as on wishes, of whatever data types.
+Passing these properties one at a time to the components can get messy very fast. Therefore we many pass off one property that is an entire object.
+
+The two primary ways data is stored in react is with props(as shown), and state.
+Inside the Zones component, set up an object that holds its states and place the Zones inside the state of the components.
+Set up the object using a constructor in Zones component with a list of the various states of the components. State being the current data that it holds.
+Within a variable, iterate through the list and for each iteration assign the state to its respective component.
+This variable is placed in the JSX tag. NOTE: react variables have to be placed in curly {} brackets.
+
+Properties is always assigned to components whereas state is always assigned to itself.
+Properties are passed down from parent components whereas states are not.
+
+In JSX, all inline styling has to happen inside an object, so the HTML:
+<a style=text-decoration: 'none'; color:'red' href="#">
+becomes JSX:
+<a style={{textDecoration: 'none', color:'red'}} href="#">
+Non-numerical values have to be in single quotes.
+
+If a default style sheet is to be defined in the code, define a const object with a variable that holds these styles.
+At the tag to apply the style, reference the object.
+It resembles CSS but it is not.
+This style sheet should be placed in its own file so that other components can use it.
+In the style sheet, seperate the styles so that they are assigned to specific components or all components.
+
+Zones is the container component, ZonesList is the presentation component. 
+The container component is housed under the layout component, in this case, Home.js
+
+****Get bootstrap link into the src/app.js to define its layout
+
+Capturing values from the user
+Within the render function of the component, define input textboxes and a submit button.
+For these textboxes and button, define: 
+    onChange event for the textboxes
+    onClick event for the button
+Each event should have a function to be executed when it is triggered.
+connect function to an event:
+    onChange={this.updeateUsername.bind(this)}
+    onChange={this.updateComment.bind(this)}
+    onClick={this.submitComment.bind(this)}
+Every time the user types in a value to the input, it triggers the onChange event.
+In the function binding, event is implicitly passed in. To retrieve the value typed in, use: event.target.value
+The values retrieved is to be captured in the state.
+However, in react you never mutate state. 
+What is done is that a copy is made, update the copy and then reset the state:
+    let updateComment = Object.assign({}, this.state.comment);
+    updateComment['username'] = event.trigger.value;
+    this.setState({
+        comment: updateComment
+    })
+the setState function saves the change and rerenders the component. This is the important concept of React that makes it automatically make changes in pages.
+
+API requests
+Now that react components have been set up to display data, the data itself needs to be retrieved from the database.
+This is done by accessing the NODE APIs that were earlier set up.
+In order to make the API request, a module has to be installed that makes API requests:
+    npm i -s superagent
+Import superagent to the container components, Zones and Comments
+Override the componentDidMount() method.
+In the method, use the superagent to make a request:
+        superagent
+        .get()
+        .query()
+        .set()
+        .end()
+
+In the get request, enter the URL to retrieve the zone database: get('/api/zone')
+In the query request, since we don't have a query, it's null: query(null)
+In the set request, define the type of data that is returned/in payload: set('Accept', '/application')
+In the end request, place the callback function according to convention: end((err, responce) =>{})
+Within the callback's responce.body, retrieve the payload in results:
+    let results = response.body.results
+    this.setState({
+        list: results
+    })
+
+Prepare project for github
+First, setup a gitignore file to ignore the files we don't want to upload:
+    copy NUL .gitignore
+In the file, type in:
+    /node_modules/
+Create a .env file
+
+
+
+
+
+
